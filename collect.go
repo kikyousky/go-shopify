@@ -13,6 +13,7 @@ const collectsBasePath = "collects"
 type CollectService interface {
 	List(interface{}) ([]Collect, error)
 	Count(interface{}) (int, error)
+	Create(collectionID, productID int64) (*Collect, error)
 }
 
 // CollectServiceOp handles communication with the collect related methods of
@@ -55,4 +56,17 @@ func (s *CollectServiceOp) List(options interface{}) ([]Collect, error) {
 func (s *CollectServiceOp) Count(options interface{}) (int, error) {
 	path := fmt.Sprintf("%s/%s/count.json", globalApiPathPrefix, collectsBasePath)
 	return s.client.Count(path, options)
+}
+
+func (s *CollectServiceOp) Create(collectionID, productID int64) (*Collect, error) {
+	path := fmt.Sprintf("%s/%s.json", globalApiPathPrefix, collectsBasePath)
+	resource := new(CollectResource)
+	err := s.client.Post(path,
+		CollectResource{Collect: &Collect{
+			ProductID:    productID,
+			CollectionID: collectionID,
+		}},
+		new(CollectResource),
+	)
+	return resource.Collect, err
 }

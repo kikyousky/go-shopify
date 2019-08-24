@@ -43,7 +43,7 @@ type Product struct {
 	PublishedScope                 string          `json:"published_scope,omitempty"`
 	Tags                           string          `json:"tags,omitempty"`
 	Options                        []ProductOption `json:"options,omitempty"`
-	Variants                       *[]Variant      `json:"variants,omitempty"`
+	Variants                       []Variant       `json:"variants,omitempty"`
 	Image                          Image           `json:"image,omitempty"`
 	Images                         []Image         `json:"images,omitempty"`
 	TemplateSuffix                 string          `json:"template_suffix,omitempty"`

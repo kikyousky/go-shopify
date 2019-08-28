@@ -258,7 +258,7 @@ func (c *Client) Do(req *http.Request, v interface{}) error {
 		if err != nil {
 			if resp != nil && resp.StatusCode == 429 {
 				f, _ := strconv.ParseFloat(resp.Header.Get("retry-after"), 64)
-				time.Sleep(time.Duration(f) * time.Second)
+				time.Sleep(time.Duration(f+2) * time.Second)
 			} else {
 				time.Sleep(1 * time.Second)
 			}

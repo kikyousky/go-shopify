@@ -5,6 +5,8 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"github.com/google/go-querystring/query"
+	"gopkg.in/matryer/try.v1"
 	"io/ioutil"
 	"net/http"
 	"net/url"
@@ -14,8 +16,6 @@ import (
 	"strconv"
 	"strings"
 	"time"
-
-	"github.com/google/go-querystring/query"
 )
 
 const (
@@ -251,11 +251,28 @@ func NewClient(app App, shopName, token string, opts ...Option) *Client {
 // response. It does not make much sense to call Do without a prepared
 // interface instance.
 func (c *Client) Do(req *http.Request, v interface{}) error {
-	resp, err := c.Client.Do(req)
+	var resp *http.Response
+	err := try.Do(func(attempt int) (bool, error) {
+		var err error
+		resp, err = c.Client.Do(req)
+		if err != nil {
+			if resp != nil && resp.StatusCode == 429 {
+				f, _ := strconv.ParseFloat(resp.Header.Get("retry-after"), 64)
+				time.Sleep(time.Duration(f) * time.Second)
+			} else {
+				time.Sleep(1 * time.Second)
+			}
+		}
+		if resp != nil {
+			defer resp.Body.Close()
+		}
+
+		return attempt < 3, err
+	})
+
 	if err != nil {
 		return err
 	}
-	defer resp.Body.Close()
 
 	err = CheckResponseError(resp)
 	if err != nil {
@@ -424,7 +441,6 @@ func (c *Client) CreateAndDo(method, path string, data, options, resource interf
 	if err != nil {
 		return err
 	}
-
 	return nil
 }
 

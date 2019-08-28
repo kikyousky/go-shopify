@@ -263,13 +263,11 @@ func (c *Client) Do(req *http.Request, v interface{}) error {
 				time.Sleep(1 * time.Second)
 			}
 		}
-		if resp != nil {
-			defer resp.Body.Close()
-		}
-
 		return attempt < 3, err
 	})
-
+	if resp != nil {
+		defer resp.Body.Close()
+	}
 	if err != nil {
 		return err
 	}

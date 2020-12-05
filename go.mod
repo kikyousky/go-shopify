@@ -1,4 +1,4 @@
-module github.com/kikyousky/go-shopify
+module github.com/ztp130213/go-shopify
 
 go 1.12
 
